@@ -6,8 +6,30 @@ const app = express();
 const port = process.env.port || 3000;
 
 // middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    optionsSuccessStatus: 200,
+  })
+);
 app.use(express.json());
+
+// token verification
+
+const verifyJWT = (req, res, next) => {
+  const authorization = req.headers.authorization;
+  if (authorization) {
+    return res.send({message: 'No Token'})
+  }
+  const token = authorization.split(' ')[1]
+  jwt.verify(token, process.env.ACCESS_KEY_TOKEN, (error, decoded) => {
+    if (error) {
+      return res.send({message: 'Invalid Token'})
+    }
+    req.decoded = decoded
+    next()
+  })
+}
 
 // /mongodb
 
@@ -21,17 +43,16 @@ const client = new MongoClient(url, {
   },
 });
 
-
 const dbConnect = async () => {
-    try {
-        client.connect()
-        console.log('Database connected successfully')
-    } catch (error) {
-        console.log(error.name, error.message)
-    }
-}
+  try {
+    client.connect();
+    console.log("Database connected successfully");
+  } catch (error) {
+    console.log(error.name, error.message);
+  }
+};
 
-dbConnect()
+dbConnect();
 
 // api
 
@@ -42,3 +63,4 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`Server is runing on port, ${port}`);
 });
+
