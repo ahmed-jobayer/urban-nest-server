@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const app = express();
 const port = process.env.port || 3000;
@@ -70,59 +70,69 @@ const dbConnect = async () => {
 
     app.get("/user/:email", async (req, res) => {
       const email = req.params.email;
-      console.log(email)
+      console.log(email);
       const query = { email: email };
       const result = await userCollection.findOne(query);
       res.send(result);
       console.log(result);
     });
 
-// get product
+    // get product
 
-app.get("/all-products", async (req, res) => {
-  // name searching
-  // sort by price
-  // filter by category
-  // filter by brand
+    app.get("/all-products", async (req, res) => {
+      // name searching
+      // sort by price
+      // filter by category
+      // filter by brand
 
-  const { title, sort, category, brand, page = 1, limit = 9 } = req.query;
+      const { title, sort, category, brand, page = 1, limit = 9 } = req.query;
 
-  const query = {};
+      const query = {};
 
-  if (title) {
-    query.title = { $regex: title, $options: "i" };
-  }
+      if (title) {
+        query.title = { $regex: title, $options: "i" };
+      }
 
-  if (category) {
-    query.category = { $regex: category, $options: "i" };
-  }
+      if (category) {
+        query.category = { $regex: category, $options: "i" };
+      }
 
-  if (brand) {
-    query.brand = brand;
-  }
+      if (brand) {
+        query.brand = brand;
+      }
 
-  const pageNumber = Number(page);
-  const limitNumber = Number(limit);
+      const pageNumber = Number(page);
+      const limitNumber = Number(limit);
 
-  const sortOptions = sort === "asc" ? 1 : -1;
+      const sortOptions = sort === "asc" ? 1 : -1;
 
-  const products = await productCollection
-    .find(query)
-    .skip((pageNumber - 1) * limit)
-    .limit(limitNumber)
-    .sort({ price: sortOptions })
-    .toArray();
+      const products = await productCollection
+        .find(query)
+        .skip((pageNumber - 1) * limit)
+        .limit(limitNumber)
+        .sort({ price: sortOptions })
+        .toArray();
 
-  const totalproducts = await productCollection.countDocuments(query);
+      const totalproducts = await productCollection.countDocuments(query);
 
-  const categories = [
-    ...new Set(products.map((product) => product.category)),
-  ];
+      const categories = [
+        ...new Set(products.map((product) => product.category)),
+      ];
 
-  const brands = [...new Set(products.map((product) => product.brand))];
+      const brands = [...new Set(products.map((product) => product.brand))];
 
-  res.json({ products, totalproducts, categories, brands });
-});
+      res.json({ products, totalproducts, categories, brands });
+    });
+
+    // get product by id
+
+    app.get("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(String(id)) };
+      const result = await productCollection.findOne(query);
+      res.send(result);
+    });
+
 
 
 
