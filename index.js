@@ -105,6 +105,14 @@ const dbConnect = async () => {
       res.send(result);
     });
 
+    // seller api
+    // add iteams
+    app.post("/add-product", verifyJWT, async (req, res) => {
+      const product = req.body;
+      const result = await productCollection.insertOne(product);
+      res.send(result);
+    });
+
     // get product
 
     app.get("/all-products", async (req, res) => {
