@@ -120,9 +120,19 @@ const dbConnect = async () => {
     // add iteams
     app.post("/add-product", verifyJWT, verifySeller, async (req, res) => {
       const product = req.body;
+      // console.log(product)
       const result = await productCollection.insertOne(product);
-      res.send(result);
+      console.log(result)
+      // res.send(result);
     });
+
+    // get items according to seller email
+
+    app.get('/seller-products',  async(req, res) => {
+      const email = req.query.email
+      const result = await productCollection.find({SellerEmail: email}).toArray()
+      res.send(result)
+    })
 
     // get product
 
