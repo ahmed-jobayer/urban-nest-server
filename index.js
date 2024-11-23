@@ -128,11 +128,21 @@ const dbConnect = async () => {
 
     // get items according to seller email
 
-    app.get('/seller-products',  async(req, res) => {
+    app.get('/seller-products', verifyJWT, verifySeller, async(req, res) => {
       const email = req.query.email
       const result = await productCollection.find({SellerEmail: email}).toArray()
       res.send(result)
     })
+// delet item with id
+    app.delete("/deleteProduct/:id", verifyJWT, verifySeller, async (req, res) => {
+      const id = req.params.id;
+      console.log(id)
+      const result = await productCollection.deleteOne({
+        _id: new ObjectId(String(id)),
+      });
+      console.log(result)
+      res.send(result);
+    });
 
     // get product
 
