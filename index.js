@@ -70,40 +70,50 @@ const dbConnect = async () => {
 
     app.get("/user/:email", async (req, res) => {
       const email = req.params.email;
-      console.log(email);
       const query = { email: email };
-      const result = await userCollection.findOne(query);
-      res.send(result);
-      console.log(result);
+      const user = await userCollection.findOne(query);
+      res.send(user);
     });
+    // admin related api
+    // get all users
+
+    app.get("/users", async (req, res) => {
+      const users = await userCollection.find().toArray();
+      res.send(users);
+    });
+
+    // delete user
+
+    app.delete('/deleteUser/:id', async (req, res) => {
+      const id = req.params.id
+      // console.log(id) 
+      const result = await userCollection.deleteOne({_id: new ObjectId(String(id))})
+      res.send(result)
+    })
 
     // get product
 
     app.get("/all-products", async (req, res) => {
-      // name searching
-      // sort by price
-      // filter by category
-      // filter by brand
-
       const { title, sort, category, brand, page = 1, limit = 9 } = req.query;
 
       const query = {};
+      // name searching
 
       if (title) {
         query.title = { $regex: title, $options: "i" };
       }
-
+      // filter by category
       if (category) {
         query.category = { $regex: category, $options: "i" };
       }
-
+      // filter by brand
       if (brand) {
         query.brand = brand;
       }
 
       const pageNumber = Number(page);
       const limitNumber = Number(limit);
-
+      // sort by price
       const sortOptions = sort === "asc" ? 1 : -1;
 
       const products = await productCollection
@@ -132,16 +142,6 @@ const dbConnect = async () => {
       const result = await productCollection.findOne(query);
       res.send(result);
     });
-
-
-
-
-
-
-
-
-
-
   } catch (error) {
     console.log(error.name, error.message);
   }
