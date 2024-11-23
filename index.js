@@ -32,6 +32,17 @@ const verifyJWT = (req, res, next) => {
   });
 };
 
+// verify seller
+
+const verifySeller = async (req, res, next) => {
+  const email = req.decoded.email;
+  const user = await userCollection.findOne({email: email})
+  if (user?.role !== 'seller') {
+    return res.send({message: 'Forbidden Access'})
+  }
+  next()
+}
+
 // /mongodb
 
 const url = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.oapnwos.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -107,7 +118,7 @@ const dbConnect = async () => {
 
     // seller api
     // add iteams
-    app.post("/add-product", verifyJWT, async (req, res) => {
+    app.post("/add-product", verifyJWT, verifySeller, async (req, res) => {
       const product = req.body;
       const result = await productCollection.insertOne(product);
       res.send(result);
