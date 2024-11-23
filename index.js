@@ -84,12 +84,26 @@ const dbConnect = async () => {
 
     // delete user
 
-    app.delete('/deleteUser/:id', async (req, res) => {
-      const id = req.params.id
-      // console.log(id) 
-      const result = await userCollection.deleteOne({_id: new ObjectId(String(id))})
-      res.send(result)
-    })
+    app.delete("/deleteUser/:id", async (req, res) => {
+      const id = req.params.id;
+      // console.log(id)
+      const result = await userCollection.deleteOne({
+        _id: new ObjectId(String(id)),
+      });
+      res.send(result);
+    });
+    // make buyer to seller
+
+    app.patch("/makeSeller/:id", async (req, res) => {
+      const id = req.params.id;
+      // console.log(id)
+
+      const query = { _id: new ObjectId(String(id)), role: "buyer" };
+      const updatedDoc = { $set: { role: "seller" } };
+
+      const result = await userCollection.updateOne(query, updatedDoc);
+      res.send(result);
+    });
 
     // get product
 
